@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-03-24-create-admin" author="admin">
+        <insert tableName="users">
+            <column name="login" value="admin"/>
+            <!--12345678-->
+            <column name="password" value="$2a$10$njPmLRVbW4DqSTv8FrFUQuCpTAhX0tLXH8FTCD3jOqSqC1i0PS/0i"/>
+            <column name="role" value="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

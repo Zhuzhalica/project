@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-03-24-create-image-meta-table" author="admin">
+        <createTable tableName="image_meta">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="user_id" type="BIGINT" />
+            <column name="size" type="BIGINT" />
+            <column name="name" type="VARCHAR" />
+        </createTable>
+        <addForeignKeyConstraint baseTableName="image_meta" baseColumnNames="user_id"
+                                 constraintName="image_user_fkey"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id" onDelete="CASCADE" onUpdate="CASCADE"/>
+        <rollback>
+            <dropTable tableName="image_meta"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

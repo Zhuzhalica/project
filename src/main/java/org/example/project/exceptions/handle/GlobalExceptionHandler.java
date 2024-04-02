@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.security.GeneralSecurityException;
+import java.security.SignatureException;
 import java.util.HashMap;
 
 @RestControllerAdvice
@@ -21,7 +23,7 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({EntityNotFoundException.class, EntityExistsException.class})
     protected final ResponseEntity<Object> EntityExceptionHandler(Exception ex) {
         if (ex instanceof EntityNotFoundException exception) {
-            return getResponseEntity(exception.getMessage(), HttpStatus.NOT_FOUND);
+            return getResponseEntity(exception.getDetail(), HttpStatus.NOT_FOUND);
         } else if (ex instanceof EntityExistsException exception) {
             return getResponseEntity(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -31,8 +33,8 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ValidateException.class})
     protected final ResponseEntity<Object> ValidateExceptionHandler(Exception ex) {
-        if (ex instanceof ValidateException) {
-            return getResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        if (ex instanceof ValidateException exception) {
+            return getResponseEntity(exception.getDetail(), HttpStatus.BAD_REQUEST);
         }
 
         return AllExceptionHandler(ex);
@@ -40,8 +42,8 @@ class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({DataIntegrityViolationException.class, DbActionExecutionException.class})
     protected final ResponseEntity<Object> SqlExceptionHandler(Exception ex) {
-        if (ex instanceof DataIntegrityViolationException) {
-            return getResponseEntity(ex.getCause().getLocalizedMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        if (ex instanceof DataIntegrityViolationException exception) {
+            return getResponseEntity(exception.getCause().getLocalizedMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return AllExceptionHandler(ex);

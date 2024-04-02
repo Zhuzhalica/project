@@ -1,4 +1,4 @@
-package org.example.project.services.user;
+package org.example.project.services;
 
 import lombok.RequiredArgsConstructor;
 import org.example.project.exceptions.custom.EntityNotFoundException;

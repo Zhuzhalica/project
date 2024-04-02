@@ -1,4 +1,4 @@
-package org.example.project.services.image;
+package org.example.project.services;
 
 import lombok.RequiredArgsConstructor;
 import org.example.project.dataModels.mappers.ImageMapper;

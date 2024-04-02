@@ -5,7 +5,7 @@ import org.example.project.dataModels.enums.Role;
 import org.example.project.dataModels.models.User;
 import org.example.project.exceptions.custom.EntityNotFoundException;
 import org.example.project.repositories.UserRepository;
-import org.example.project.services.user.UserService;
+import org.example.project.services.UserService;
 import org.example.project.utils.JWTUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

@@ -5,17 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.project.dataModels.dto.MetaImageInfoResponse;
 import org.example.project.dataModels.dto.UploadImageResponse;
 import org.example.project.dataModels.mappers.ImageMapper;
-import org.example.project.exceptions.custom.ValidateException;
 import org.example.project.helpers.UserContextHelper;
-import org.example.project.services.image.ImageService;
-import org.example.project.services.user.UserDetailServiceImpl;
-import org.example.project.services.user.UserService;
+import org.example.project.services.ImageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,7 +35,7 @@ public class ImageController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping(value = "/image/{imageId}", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/image/{imageId}", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
     public byte[] downloadImage(@PathVariable String imageId) throws Exception {
         var user = userContextHelper.getUserByRequestContext();
         var id = UUID.fromString(imageId);
@@ -49,7 +44,7 @@ public class ImageController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @DeleteMapping(value = "/image/{imageId}", produces = MediaType.IMAGE_PNG_VALUE)
+    @DeleteMapping(value = "/image/{imageId}")
     public ResponseEntity<Object> deleteImage(@PathVariable String imageId) throws Exception {
         var user = userContextHelper.getUserByRequestContext();
         var id = UUID.fromString(imageId);
@@ -57,7 +52,7 @@ public class ImageController {
         service.deleteImage(id, user.getId());
 
         var body = new HashMap<String, Object>(){{
-            put("success", true);
+            put("success", "true");
         }};
         return new ResponseEntity<>(body, HttpStatus.OK);
     }

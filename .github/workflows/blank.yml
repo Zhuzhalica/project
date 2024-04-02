@@ -53,9 +53,8 @@ jobs:
       - name: Run tests
         run: mvn clean install
       - name: Run Coverage
-        run: |
-          chmod +x gradlew
-          ./gradlew testCoverage
+        run:
+          chmod +r ${{ github.workspace }}/target/site/jacoco/jacoco.xml
       - uses: madrapps/jacoco-report@v1.2
         with:
           paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml

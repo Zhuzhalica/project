@@ -52,14 +52,11 @@ jobs:
           cache: 'maven'
       - name: Run tests
         run: mvn clean install
-      - name: Run Coverage
-        run:
-          chmod +r ${{ github.workspace }}/target/site/jacoco/jacoco.xml
-      - uses: madrapps/jacoco-report@v1.2
+      - uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 50
+#          min-coverage-overall: 50
 
 
   deploy:

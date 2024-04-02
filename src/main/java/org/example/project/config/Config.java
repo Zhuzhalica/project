@@ -1,6 +1,5 @@
 package org.example.project.config;
 
-
 import org.example.project.settings.ProjectSettings;
 import org.example.project.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +31,8 @@ public class Config {
     }
 
     @Bean
-    public ProjectSettings settings(@Value("${settings.maxImageSize}") Long maxImageSize, @Value("${settings.imageContentTypes}") Set<String> imageContentTypes) {
+    public ProjectSettings settings(@Value("${settings.maxImageSize}") Long maxImageSize,
+                                    @Value("${settings.imageContentTypes}") Set<String> imageContentTypes) {
         return new ProjectSettings(maxImageSize, imageContentTypes);
     }
 }

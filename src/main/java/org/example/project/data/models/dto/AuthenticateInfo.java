@@ -1,4 +1,4 @@
-package org.example.project.dataModels.dto;
+package org.example.project.data.models.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,5 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AuthenticateInfo {
-    private String token;
+
+  private String token;
 }

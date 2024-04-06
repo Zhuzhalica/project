@@ -1,11 +1,11 @@
 package org.example.project.repositories;
 
 
-import org.example.project.dataModels.models.User;
+import java.util.Optional;
+import org.example.project.data.models.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByLogin(String login);
+
+  Optional<User> findByLogin(String login);
 }

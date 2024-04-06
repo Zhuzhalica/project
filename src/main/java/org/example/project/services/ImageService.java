@@ -12,6 +12,9 @@ import org.example.project.repositories.MetaImageInfoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Service for work with images.
+ */
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -21,6 +24,14 @@ public class ImageService {
   private final ImageValidator validator;
   private final ImageMapper mapper = ImageMapper.INSTANCE;
 
+  /**
+   * Load users image.
+   *
+   * @param file   image
+   * @param userId user id
+   * @return image id
+   * @throws Exception some image save in repository exception.
+   */
   public UUID loadImage(MultipartFile file, long userId) throws Exception {
     validator.validateImage(file);
 
@@ -34,6 +45,14 @@ public class ImageService {
     return id;
   }
 
+  /**
+   * Download image.
+   *
+   * @param id     image id
+   * @param userId user id
+   * @return image as bytes
+   * @throws Exception some image get from repository exception.
+   */
   public byte[] downloadImage(UUID id, long userId) throws Exception {
     var metaInfo = metaRepository.findById(id).orElse(null);
 
@@ -48,6 +67,13 @@ public class ImageService {
     return imageRepository.downloadImage(id);
   }
 
+  /**
+   * Delete image.
+   *
+   * @param id     image id
+   * @param userId user id
+   * @throws Exception some image delete from repository exception.
+   */
   public void deleteImage(UUID id, long userId) throws Exception {
     var metaInfo = metaRepository.findById(id).orElse(null);
 
@@ -63,6 +89,12 @@ public class ImageService {
     metaRepository.deleteById(id);
   }
 
+  /**
+   * Get user images meta info.
+   *
+   * @param userId user id
+   * @return List of user images meta info
+   */
   public List<MetaImageInfo> getUserImageMeta(Long userId) {
     return metaRepository.findAllByUserId(userId);
   }

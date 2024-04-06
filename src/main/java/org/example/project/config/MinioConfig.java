@@ -15,6 +15,13 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(MinioProperties.class)
 public class MinioConfig {
 
+  /**
+   * Build minio client bean by properties.
+   *
+   * @param minioProperties properties minio client
+   * @return minio client
+   * @throws Exception minio client builder exceptions
+   */
   @Bean
   public MinioClient minoClient(MinioProperties minioProperties) throws Exception {
     var client = MinioClient.builder()

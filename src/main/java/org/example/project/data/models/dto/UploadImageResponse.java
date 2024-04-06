@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Info after save image.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

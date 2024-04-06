@@ -33,6 +33,13 @@ public class ImageController {
   private final UserContextHelper userContextHelper;
   private final ImageMapper mapper = ImageMapper.INSTANCE;
 
+  /**
+   * Load users image.
+   *
+   * @param file image
+   * @return image id
+   * @throws Exception some service exceptions
+   */
   @PreAuthorize("hasRole('USER')")
   @PostMapping("/image")
   public UploadImageResponse uploadImage(MultipartFile file) throws Exception {
@@ -41,6 +48,13 @@ public class ImageController {
     return new UploadImageResponse(service.loadImage(file, user.getId()).toString());
   }
 
+  /**
+   * Download image.
+   *
+   * @param imageId image id
+   * @return image as bytes
+   * @throws Exception some service exceptions
+   */
   @PreAuthorize("hasRole('USER')")
   @GetMapping(value = "/image/{imageId}", produces = {MediaType.IMAGE_PNG_VALUE,
       MediaType.IMAGE_JPEG_VALUE})
@@ -51,6 +65,13 @@ public class ImageController {
     return service.downloadImage(id, user.getId());
   }
 
+  /**
+   * Delete image.
+   *
+   * @param imageId image id
+   * @return success
+   * @throws Exception some service exceptions
+   */
   @PreAuthorize("hasRole('USER')")
   @DeleteMapping(value = "/image/{imageId}")
   public ResponseEntity<Object> deleteImage(@PathVariable String imageId) throws Exception {
@@ -64,6 +85,11 @@ public class ImageController {
     return new ResponseEntity<>(body, HttpStatus.OK);
   }
 
+  /**
+   * Get user images meta info.
+   *
+   * @return user images meta info
+   */
   @PreAuthorize("hasRole('USER')")
   @GetMapping("/images")
   public List<MetaImageInfoResponse> getImages() {

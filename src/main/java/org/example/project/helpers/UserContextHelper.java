@@ -7,12 +7,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+/**
+ * Helper with frequent methods.
+ */
 @Component
 @RequiredArgsConstructor
 public class UserContextHelper {
 
   private final UserService userService;
 
+  /**
+   * Get user by request context.
+   *
+   * @return user info
+   */
   public User getUserByRequestContext() {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();

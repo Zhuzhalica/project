@@ -21,6 +21,12 @@ public class AuthController {
   private final UserService service;
   private final UserMapper mapper = UserMapper.INSTANCE;
 
+  /**
+   * Sign in or login user.
+   *
+   * @param request users credentials
+   * @return users jwt-token
+   */
   @PostMapping
   public AuthenticateInfo auth(@RequestBody CreateUserDto request) {
     var user = mapper.toUserEntity(request);

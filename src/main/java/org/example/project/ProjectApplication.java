@@ -3,6 +3,9 @@ package org.example.project;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Start project.
+ */
 @SpringBootApplication
 public class ProjectApplication {
 

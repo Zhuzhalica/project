@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Image meta info entity for repository.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

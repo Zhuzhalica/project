@@ -6,6 +6,9 @@ import org.example.project.data.models.models.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+/**
+ * Map user dto, models, etc.
+ */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 

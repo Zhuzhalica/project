@@ -23,6 +23,13 @@ public class SecurityConfig {
 
   private final JwtAuthFilter jwtAuthFilter;
 
+  /**
+   * Build spring security bean.
+   *
+   * @param httpSecurity spring security context
+   * @return security filter chain
+   * @throws Exception cors or security build exceptions
+   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     httpSecurity

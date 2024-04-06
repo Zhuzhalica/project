@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.project.data.models.enums.Role;
 
+/**
+ * User entity for repository.
+ */
 @Getter
 @Setter
 @Entity
@@ -33,6 +36,11 @@ public class User {
   @Column(name = "role")
   private Role role;
 
+  /**
+   * User constructor from user.
+   *
+   * @param user user
+   */
   public User(User user) {
     this.id = user.id;
     this.role = user.role;

@@ -5,6 +5,9 @@ import java.util.UUID;
 import org.example.project.data.models.models.MetaImageInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * Repository with meta image info.
+ */
 public interface MetaImageInfoRepository extends JpaRepository<MetaImageInfo, UUID> {
 
   List<MetaImageInfo> findAllByUserId(Long animalId);

@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Common project settings.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

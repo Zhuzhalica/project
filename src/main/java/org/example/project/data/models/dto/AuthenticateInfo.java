@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * User info after authenticate.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

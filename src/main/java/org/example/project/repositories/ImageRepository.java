@@ -12,6 +12,9 @@ import org.example.project.config.MinioProperties;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Repository with images.
+ */
 @Repository
 @RequiredArgsConstructor
 public class ImageRepository {
@@ -19,23 +22,43 @@ public class ImageRepository {
   private final MinioClient client;
   private final MinioProperties properties;
 
-  public UUID loadImage(MultipartFile file) throws Exception {
+  /**
+   * Save image.
+   *
+   * @param image image
+   * @return image id
+   * @throws Exception save exception
+   */
+  public UUID loadImage(MultipartFile image) throws Exception {
     var fileId = UUID.randomUUID();
 
-    var inputStream = new ByteArrayInputStream(file.getBytes());
+    var inputStream = new ByteArrayInputStream(image.getBytes());
     client.putObject(
         PutObjectArgs.builder().bucket(properties.getBucket()).object(fileId.toString())
-            .stream(inputStream, file.getSize(), properties.getImageSize())
-            .contentType(file.getContentType()).build());
+            .stream(inputStream, image.getSize(), properties.getImageSize())
+            .contentType(image.getContentType()).build());
 
     return fileId;
   }
 
+  /**
+   * Get image.
+   *
+   * @param id image id
+   * @return image as bytes
+   * @throws Exception get image exception
+   */
   public byte[] downloadImage(UUID id) throws Exception {
     return IOUtils.toByteArray(client.getObject(
         GetObjectArgs.builder().bucket(properties.getBucket()).object(id.toString()).build()));
   }
 
+  /**
+   * Delete image.
+   *
+   * @param id image id
+   * @throws Exception delete image exception
+   */
   public void deleteImage(UUID id) throws Exception {
     client.removeObject(
         RemoveObjectArgs.builder().bucket(properties.getBucket()).object(id.toString()).build());

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="2024-05-23-create-processed-image-table" author="admin">
+    <createTable tableName="processed_image">
+      <column name="image_id" type="UUID"/>
+      <column name="request_id" type="UUID"/>
+    </createTable>
+    <addPrimaryKey tableName="processed_image" columnNames="image_id,request_id"
+      constraintName="primary_key_constraint"/>
+    <rollback>
+      <dropTable tableName="processed_image"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

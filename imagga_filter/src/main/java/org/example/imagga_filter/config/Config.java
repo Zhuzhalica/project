@@ -1,51 +1,25 @@
-package org.example.project.config;
+package org.example.imagga_filter.config;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.postgresql.Bucket4jPostgreSQL;
+import io.minio.MinioClient;
 import java.time.Duration;
-import java.util.Set;
 import javax.sql.DataSource;
-import org.example.project.settings.ProjectSettings;
-import org.example.project.utils.JwtUtils;
+import org.example.filter_sdk.ImageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * Custom project configs.
- */
 @Configuration
 public class Config {
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
-      throws Exception {
-    return configuration.getAuthenticationManager();
-  }
-
-  @Bean
-  public JwtUtils jwtUtils(@Value("${jwt.secret}") String secret) {
-    return new JwtUtils(secret);
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
-
-  @Bean
-  public ProjectSettings settings(@Value("${settings.maxImageSize}") Long maxImageSize,
-      @Value("${settings.imageContentTypes}")
-      Set<String> imageContentTypes) {
-    return new ProjectSettings(maxImageSize, imageContentTypes);
+  public ImageRepository imageRepository(MinioProperties minioProperties, MinioClient minioClient) {
+    return new ImageRepository(minioClient, minioProperties);
   }
 
   @Bean
@@ -67,7 +41,7 @@ public class Config {
         .build();
     var configuration = BucketConfiguration.builder()
         .addLimit(
-            Bandwidth.builder().capacity(10).refillGreedy(10, Duration.ofMinutes(2)).build())
+            Bandwidth.builder().capacity(10).refillGreedy(10, Duration.ofMinutes(1)).build())
         .build();
 
     return proxyManager.getProxy(1L, () -> configuration);

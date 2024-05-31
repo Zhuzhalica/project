@@ -1,0 +1,48 @@
+version: '3.5'
+
+services:
+
+  imagga_filter:
+    image: project:0.0.1
+    container_name: imagga_filter
+    build:
+      context: .
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres/image_project
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - MINIO_URL=http://127.0.0.1:9000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:14-alpine3.18
+    container_name: imagga_filter_db
+    environment:
+      POSTGRES_DB: 'image_project'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+    volumes:
+      - imagga_filter_db:/var/lib/postgres/data
+    ports:
+      - "15433:5432"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2-rc-alpine
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning
+    #     --requirepass 12345
+    volumes:
+      - imagga_filter_redis:/data
+
+volumes:
+  imagga_filter_db:
+  imagga_filter_redis:

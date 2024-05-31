@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="2024-04-21-create-filter-meta-table" author="admin">
+    <createTable tableName="filter_image_info">
+      <column name="request_id" type="UUID">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="filter_image_id" type="UUID"/>
+      <column name="original_image_id" type="UUID"/>
+      <column name="status" type="VARCHAR"/>
+    </createTable>
+    <addForeignKeyConstraint baseTableName="filter_image_info" baseColumnNames="original_image_id"
+      constraintName="filter_image_image_fkey"
+      referencedTableName="image_meta"
+      referencedColumnNames="id" onDelete="CASCADE" onUpdate="CASCADE"/>
+    <rollback>
+      <dropTable tableName="filter_image_info"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

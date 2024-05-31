@@ -1,0 +1,36 @@
+version: '3.5'
+
+services:
+
+  filter_five:
+    image: project:0.0.1
+    container_name: filter_five
+    build:
+      context: .
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres/image_project
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - MINIO_URL=http://127.0.0.1:9000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+
+  postgres:
+    image: postgres:14-alpine3.18
+    container_name: filter_five_db
+    environment:
+      POSTGRES_DB: 'image_project'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+    volumes:
+      - filter_five_db:/var/lib/postgres/data
+    ports:
+      - "65432:5432"
+    restart: unless-stopped
+
+volumes:
+  filter_five_db:

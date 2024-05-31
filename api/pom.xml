@@ -214,6 +214,15 @@
       <artifactId>filter_sdk</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.bucket4j</groupId>
+      <artifactId>bucket4j_jdk17-postgresql</artifactId>
+      <version>8.12.1</version>
+    </dependency>
   </dependencies>
 
   <build>

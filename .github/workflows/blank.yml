@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "master" ]
   pull_request:
-    branches: [ "master", "task_one", "task_two" ]
+    branches: [ "master", "filters" ]
 
   workflow_dispatch:
 

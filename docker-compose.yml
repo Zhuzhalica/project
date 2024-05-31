@@ -1,0 +1,51 @@
+version: '3.5'
+
+services:
+
+  java_app:
+    image: project:0.0.1
+    container_name: java_app
+    build:
+      context: .
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres/image_project
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - MINIO_URL=minio
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - minio
+    restart: unless-stopped
+
+
+  postgres:
+    image: postgres:14-alpine3.18
+    container_name: app_db
+    environment:
+      POSTGRES_DB: 'image_project'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+    volumes:
+      - app_db:/var/lib/postgres/data
+    ports:
+      - "15432:5432"
+    restart: unless-stopped
+
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    volumes:
+      - ./environment/minio/data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address :9001
+
+volumes:
+  app_db:

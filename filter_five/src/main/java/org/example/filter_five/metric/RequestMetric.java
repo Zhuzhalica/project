@@ -1,4 +1,4 @@
-package org.example.filter_one.metric;
+package org.example.filter_five.metric;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -20,11 +20,11 @@ public class RequestMetric {
 
   public void afterAction() {
     var endTime = System.currentTimeMillis();
-    var requestTimer = Timer.builder("filters.ColorInverse.requests.timer")
+    var requestTimer = Timer.builder("filters.Posterize.requests.timer")
         .register(registry);
     requestTimer.record(endTime - startTime, java.util.concurrent.TimeUnit.MILLISECONDS);
 
-    var counter = Counter.builder("filters.ColorInverse.requests.count")
+    var counter = Counter.builder("filters.Posterize.requests.count")
         .tag("success", "true")
         .register(registry);
 
@@ -33,11 +33,11 @@ public class RequestMetric {
 
   public void excpetion() {
     var endTime = System.currentTimeMillis();
-    var requestTimer = Timer.builder("filters.ColorInverse.requests.timer")
+    var requestTimer = Timer.builder("filters.Posterize.requests.timer")
         .register(registry);
     requestTimer.record(endTime - startTime, java.util.concurrent.TimeUnit.MILLISECONDS);
 
-    var counter = Counter.builder("filters.ColorInverse.requests.count")
+    var counter = Counter.builder("filters.Posterize.requests.count")
         .tag("success", "false")
         .register(registry);
 

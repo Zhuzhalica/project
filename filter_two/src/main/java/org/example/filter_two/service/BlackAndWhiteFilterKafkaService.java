@@ -1,6 +1,7 @@
 package org.example.filter_two.service;
 
 import com.google.gson.Gson;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -17,6 +18,7 @@ import org.example.filter_sdk.FilterMessage;
 import org.example.filter_sdk.ImageRepository;
 import org.example.filter_sdk.ProcessedImageId;
 import org.example.filter_two.data.model.ProcessedImage;
+import org.example.filter_two.metric.RequestMetric;
 import org.example.filter_two.repository.ProcessedImageInfoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -37,6 +39,7 @@ public class BlackAndWhiteFilterKafkaService {
   private final String wipTopic;
   private final String doneTopic;
   private final Gson jsonConverter = new Gson();
+  private final MeterRegistry registry;
 
   /**
    * Constructor.
@@ -50,12 +53,14 @@ public class BlackAndWhiteFilterKafkaService {
       ProcessedImageInfoRepository processedImageInfo,
       ImageRepository imageRepository,
       @Value("${kafka.wip-topic}") String wipTopic,
-      @Value("${kafka.done-topic}") String doneTopic) {
+      @Value("${kafka.done-topic}") String doneTopic,
+      MeterRegistry registry) {
     this.template = template;
     this.processedImageInfo = processedImageInfo;
     this.imageRepository = imageRepository;
     this.wipTopic = wipTopic;
     this.doneTopic = doneTopic;
+    this.registry = registry;
   }
 
   /**
@@ -73,8 +78,19 @@ public class BlackAndWhiteFilterKafkaService {
           ConsumerConfig.ISOLATION_LEVEL_CONFIG + "=read_committed",
           ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG
               + "=org.apache.kafka.clients.consumer.RoundRobinAssignor"})
-  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment)
-      throws Exception {
+  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment) {
+    var requestMetric = new RequestMetric(registry);
+    try {
+      requestMetric.beforeAction();
+      ProcessRequest(record, acknowledgment);
+      requestMetric.afterAction();
+    } catch (Exception e) {
+      requestMetric.excpetion();
+    }
+  }
+
+  private void ProcessRequest(ConsumerRecord<String, String> record,
+      Acknowledgment acknowledgment) throws Exception {
     var message = jsonConverter.fromJson(record.value(), FilterMessage.class);
 
     if (message.getFilters().get(0) != Filter.BlackAndWhite) {

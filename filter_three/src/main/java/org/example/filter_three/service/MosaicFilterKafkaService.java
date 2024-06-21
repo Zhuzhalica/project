@@ -1,6 +1,7 @@
 package org.example.filter_three.service;
 
 import com.google.gson.Gson;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -17,6 +18,7 @@ import org.example.filter_sdk.FilterMessage;
 import org.example.filter_sdk.ImageRepository;
 import org.example.filter_sdk.ProcessedImageId;
 import org.example.filter_three.data.model.ProcessedImage;
+import org.example.filter_three.metric.RequestMetric;
 import org.example.filter_three.repository.ProcessedImageInfoRepository;
 import org.example.filter_three.settings.FilterSettings;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +41,7 @@ public class MosaicFilterKafkaService {
   private final String wipTopic;
   private final String doneTopic;
   private final Gson jsonConverter = new Gson();
+  private final MeterRegistry registry;
 
   /**
    * Constructor.
@@ -52,13 +55,14 @@ public class MosaicFilterKafkaService {
       ProcessedImageInfoRepository processedImageInfo,
       ImageRepository imageRepository, FilterSettings settings,
       @Value("${kafka.wip-topic}") String wipTopic,
-      @Value("${kafka.done-topic}") String doneTopic) {
+      @Value("${kafka.done-topic}") String doneTopic, MeterRegistry registry) {
     this.template = template;
     this.processedImageInfo = processedImageInfo;
     this.imageRepository = imageRepository;
     this.settings = settings;
     this.wipTopic = wipTopic;
     this.doneTopic = doneTopic;
+    this.registry = registry;
   }
 
   /**
@@ -76,8 +80,19 @@ public class MosaicFilterKafkaService {
           ConsumerConfig.ISOLATION_LEVEL_CONFIG + "=read_committed",
           ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG
               + "=org.apache.kafka.clients.consumer.RoundRobinAssignor"})
-  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment)
-      throws Exception {
+  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment) {
+    var requestMetric = new RequestMetric(registry);
+    try {
+      requestMetric.beforeAction();
+      ProcessRequest(record, acknowledgment);
+      requestMetric.afterAction();
+    } catch (Exception e) {
+      requestMetric.excpetion();
+    }
+  }
+
+  private void ProcessRequest(ConsumerRecord<String, String> record,
+      Acknowledgment acknowledgment) throws Exception {
     var message = jsonConverter.fromJson(record.value(), FilterMessage.class);
 
     if (message.getFilters().get(0) != Filter.Mosaic) {

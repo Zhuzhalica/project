@@ -1,6 +1,7 @@
 package org.example.filter_one.service;
 
 import com.google.gson.Gson;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -12,6 +13,7 @@ import javax.imageio.ImageIO;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.example.filter_one.data.model.ProcessedImage;
+import org.example.filter_one.metric.RequestMetric;
 import org.example.filter_one.repository.ProcessedImageInfoRepository;
 import org.example.filter_sdk.Filter;
 import org.example.filter_sdk.FilterFinalMessage;
@@ -34,6 +36,7 @@ public class ColorInverseFilterKafkaService {
   private final KafkaTemplate<String, String> template;
   private final ProcessedImageInfoRepository processedImageInfo;
   private final ImageRepository imageRepository;
+  private final MeterRegistry registry;
   private final String wipTopic;
   private final String doneTopic;
   private final Gson jsonConverter = new Gson();
@@ -45,15 +48,14 @@ public class ColorInverseFilterKafkaService {
    * @param processedImageInfo repository processed image info
    * @param wipTopic           kafka wipTopic name for work with filters
    */
-  public ColorInverseFilterKafkaService(
-      KafkaTemplate<String, String> template,
-      ProcessedImageInfoRepository processedImageInfo,
-      ImageRepository imageRepository,
-      @Value("${kafka.wip-topic}") String wipTopic,
+  public ColorInverseFilterKafkaService(KafkaTemplate<String, String> template,
+      ProcessedImageInfoRepository processedImageInfo, ImageRepository imageRepository,
+      MeterRegistry registry, @Value("${kafka.wip-topic}") String wipTopic,
       @Value("${kafka.done-topic}") String doneTopic) {
     this.template = template;
     this.processedImageInfo = processedImageInfo;
     this.imageRepository = imageRepository;
+    this.registry = registry;
     this.wipTopic = wipTopic;
     this.doneTopic = doneTopic;
   }
@@ -64,27 +66,33 @@ public class ColorInverseFilterKafkaService {
    * @param record         message
    * @param acknowledgment consume commit
    */
-  @KafkaListener(
-      topics = "${kafka.wip-topic}",
-      groupId = "${kafka.group-id}",
-      concurrency = "${kafka.wip-partitions}",
-      properties = {
-          ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG + "=false",
-          ConsumerConfig.ISOLATION_LEVEL_CONFIG + "=read_committed",
-          ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG
-              + "=org.apache.kafka.clients.consumer.RoundRobinAssignor"})
-  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment)
+  @KafkaListener(topics = "${kafka.wip-topic}", groupId = "${kafka.group-id}", concurrency = "${kafka.wip-partitions}", properties = {
+      ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG + "=false",
+      ConsumerConfig.ISOLATION_LEVEL_CONFIG + "=read_committed",
+      ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG
+          + "=org.apache.kafka.clients.consumer.RoundRobinAssignor"})
+  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment) {
+    var requestMetric = new RequestMetric(registry);
+    try {
+      requestMetric.beforeAction();
+      ProcessRequest(record, acknowledgment);
+      requestMetric.afterAction();
+    } catch (Exception e) {
+      requestMetric.excpetion();
+    }
+
+  }
+
+  private void ProcessRequest(ConsumerRecord<String, String> record, Acknowledgment acknowledgment)
       throws Exception {
     var message = jsonConverter.fromJson(record.value(), FilterMessage.class);
-
     if (message.getFilters().get(0) != Filter.ColorInverse) {
       acknowledgment.acknowledge();
       return;
     }
 
-    var processedInfo = processedImageInfo
-        .findById(new ProcessedImageId(message.getImageId(), message.getRequestId()))
-        .orElse(null);
+    var processedInfo = processedImageInfo.findById(
+        new ProcessedImageId(message.getImageId(), message.getRequestId())).orElse(null);
 
     if (processedInfo != null) {
       acknowledgment.acknowledge();
@@ -119,10 +127,8 @@ public class ColorInverseFilterKafkaService {
     var bufferedImage = ImageIO.read(inputStream);
     var width = bufferedImage.getWidth();
     var height = bufferedImage.getHeight();
-    BufferedImage invertedImage = new BufferedImage(
-        bufferedImage.getWidth(),
-        bufferedImage.getHeight(),
-        BufferedImage.TYPE_INT_RGB);
+    BufferedImage invertedImage = new BufferedImage(bufferedImage.getWidth(),
+        bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
 
     var numThreads = Runtime.getRuntime().availableProcessors();
     var executor = Executors.newFixedThreadPool(numThreads);

@@ -1,6 +1,7 @@
 package org.example.imagga_filter.service;
 
 import com.google.gson.Gson;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.minio.StatObjectResponse;
 import java.awt.Color;
 import java.awt.Font;
@@ -18,6 +19,7 @@ import org.example.filter_sdk.ImageRepository;
 import org.example.filter_sdk.ProcessedImageId;
 import org.example.imagga_filter.ImmagaClient;
 import org.example.imagga_filter.data.model.ProcessedImage;
+import org.example.imagga_filter.metric.RequestMetric;
 import org.example.imagga_filter.repository.ProcessedImageInfoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -39,6 +41,7 @@ public class ImaggaFilterKafkaService {
   private final String wipTopic;
   private final String doneTopic;
   private final Gson jsonConverter = new Gson();
+  private final MeterRegistry registry;
 
 
   /**
@@ -54,13 +57,14 @@ public class ImaggaFilterKafkaService {
       ImageRepository imageRepository,
       ImmagaClient immagaClient,
       @Value("${kafka.wip-topic}") String wipTopic,
-      @Value("${kafka.done-topic}") String doneTopic) {
+      @Value("${kafka.done-topic}") String doneTopic, MeterRegistry registry) {
     this.template = template;
     this.processedImageInfo = processedImageInfo;
     this.imageRepository = imageRepository;
     this.immagaClient = immagaClient;
     this.wipTopic = wipTopic;
     this.doneTopic = doneTopic;
+    this.registry = registry;
   }
 
   /**
@@ -78,7 +82,18 @@ public class ImaggaFilterKafkaService {
           ConsumerConfig.ISOLATION_LEVEL_CONFIG + "=read_committed",
           ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG
               + "=org.apache.kafka.clients.consumer.RoundRobinAssignor"})
-  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment)
+  public void read(@Payload ConsumerRecord<String, String> record, Acknowledgment acknowledgment) {
+    var requestMetric = new RequestMetric(registry);
+    try {
+      requestMetric.beforeAction();
+      ProcessRequest(record, acknowledgment);
+      requestMetric.afterAction();
+    } catch (Exception e) {
+      requestMetric.excpetion();
+    }
+  }
+
+  private void ProcessRequest(ConsumerRecord<String, String> record, Acknowledgment acknowledgment)
       throws Exception {
     var message = jsonConverter.fromJson(record.value(), FilterMessage.class);
 
